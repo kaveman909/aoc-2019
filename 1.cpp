@@ -3,9 +3,7 @@
 
 using namespace std;
 
-int get_fuel(int in) {
-  return (in / 3) - 2;
-}
+int get_fuel(int in) { return (in / 3) - 2; }
 
 int get_extra_fuel(int in) {
   int sum = 0;
@@ -18,7 +16,7 @@ int get_extra_fuel(int in) {
   return sum;
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
   ifstream in(argv[1]);
   int line;
   int sum = 0;
@@ -29,4 +27,5 @@ int main(int argc, char * argv[]) {
   }
   cout << "Part 1: " << sum << endl;
   cout << "Part 2: " << sum2 << endl;
+  return 0;
 }
