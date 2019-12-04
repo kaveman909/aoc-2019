@@ -13,6 +13,8 @@ vector<vector<int> > grid(GRID_SIZE, vector<int>(GRID_SIZE, 0));
 
 // create vector for manhattan dists
 vector<int> manhat;
+// create vector for steps
+vector<int> steps;
 
 void follow_path(vector<string>, int);
 
@@ -43,13 +45,19 @@ int main(int argc, char *argv[]) {
   int min_manhat_idx =
       distance(manhat.begin(), min_element(manhat.begin(), manhat.end()));
   cout << "Part 1: " << manhat[min_manhat_idx] << endl;
+  int min_steps_idx =
+      distance(steps.begin(), min_element(steps.begin(), steps.end()));
+  cout << "Part 2: " << steps[min_steps_idx] << endl;
+
   return 0;
 }
 
 void follow_path(vector<string> wirev, int wiren) {
   // x and y coords that will be changing as we follow the map
-  int x = GRID_SIZE / 2;
-  int y = GRID_SIZE / 2;
+  const int OFFSET = GRID_SIZE / 2;
+  int x = OFFSET;
+  int y = OFFSET;
+  int tsteps = 0;
   for (string inst : wirev) {
     const char dir = inst.at(0);
     const int mag = stoi(inst.substr(1));
@@ -57,12 +65,13 @@ void follow_path(vector<string> wirev, int wiren) {
     int *d = (dir == 'R') || (dir == 'L') ? &x : &y;
 
     for (int step = 0; step < mag; step++) {
+      tsteps++;
       *d += sign;
-      if (grid[x][y] == 0) {
-        grid[x][y] = wiren;
-      } else if (grid[x][y] != wiren) {
-        grid[x][y] = 3;
-        manhat.push_back(abs(x - (GRID_SIZE / 2)) + abs(y - (GRID_SIZE / 2)));
+      if ((grid[x][y] == 0) && (wiren == 1)) {
+        grid[x][y] = tsteps;
+      } else if ((grid[x][y] != 0) && (wiren == 2)) {
+        manhat.push_back(abs(x - OFFSET) + abs(y - OFFSET));
+        steps.push_back(grid[x][y] + tsteps);
       }
     }
   }
