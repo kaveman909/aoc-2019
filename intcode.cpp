@@ -57,10 +57,10 @@ int Intcode::get_output() { return output; }
 void Intcode::run_program(int pinput) {
   input = pinput;
   pc = 0;
-  const int op_args[] = {0, 3, 3, 1, 1};
+  const int op_args[] = {0, 3, 3, 1, 1, 2, 2, 3, 3};
   // copy program as we'll be modifying memory
   program = instructions;
-  cout << "Program Size: " << program.size() << endl;
+  bool update_pc = true;
 
   while (1) {
     int inst = program[pc];
@@ -84,12 +84,42 @@ void Intcode::run_program(int pinput) {
       case 4:
         output = params[0];
         break;
+      case 5:
+        if (params[0]) {
+          pc = params[1];
+          update_pc = false;
+        }
+        break;
+      case 6:
+        if (!params[0]) {
+          pc = params[1];
+          update_pc = false;
+        }
+        break;
+      case 7:
+        if (params[0] < params[1]) {
+          program[program[pc + 3]] = 1;
+        } else {
+          program[program[pc + 3]] = 0;
+        }
+        break;
+      case 8:
+        if (params[0] == params[1]) {
+          program[program[pc + 3]] = 1;
+        } else {
+          program[program[pc + 3]] = 0;
+        }
+        break;
       default:
         cout << "ERROR! Illegal opcode. Aborting" << endl;
         return;
     }
 
-    pc += args + 1;
+    if (update_pc) {
+      pc += args + 1;
+    } else {
+      update_pc = true;
+    }
   }
 }
 
