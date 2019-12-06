@@ -52,6 +52,12 @@ Intcode::Intcode(string fn) {
   }
 }
 
+void Intcode::modify_program(int index, int value) {
+  instructions[index] = value;
+}
+
+int Intcode::get_mem(int index) { return program[index]; }
+
 int Intcode::get_output() { return output; }
 
 void Intcode::run_program(int pinput) {
