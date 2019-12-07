@@ -2,6 +2,7 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -60,8 +61,7 @@ int Intcode::get_mem(int index) { return program[index]; }
 
 int Intcode::get_output() { return output; }
 
-void Intcode::run_program(int pinput) {
-  input = pinput;
+void Intcode::run_program_common() {
   pc = 0;
   const int op_args[] = {0, 3, 3, 1, 1, 2, 2, 3, 3};
   // copy program as we'll be modifying memory
@@ -85,7 +85,8 @@ void Intcode::run_program(int pinput) {
         program[program[pc + 3]] = params[0] * params[1];
         break;
       case 3:
-        program[program[pc + 1]] = input;
+        program[program[pc + 1]] = input.front();
+        input.pop();
         break;
       case 4:
         output = params[0];
@@ -127,6 +128,19 @@ void Intcode::run_program(int pinput) {
       update_pc = true;
     }
   }
+}
+
+void Intcode::run_program() { run_program_common(); }
+
+void Intcode::run_program(int i1) {
+  input.push(i1);
+  run_program_common();
+}
+
+void Intcode::run_program(int i1, int i2) {
+  input.push(i1);
+  input.push(i2);
+  run_program_common();
 }
 
 void Intcode::print_instructions() {
