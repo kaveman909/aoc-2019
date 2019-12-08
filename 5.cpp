@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int main([[maybe_unused]] int argc, char* argv[]) {
+int main([[maybe_unused]] int argc, char *argv[]) {
   Intcode ic(argv[1]);
   ic.run_program(1);
   cout << "Part 1: " << ic.get_output() << endl;

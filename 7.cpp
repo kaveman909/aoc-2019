@@ -1,11 +1,13 @@
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <iostream>
 #include "intcode.h"
 
 using namespace std;
 
-int main([[maybe_unused]] int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
+  assert(argc == 2);
   Intcode ic(argv[1]);
   array<int, 5> settings = {0, 1, 2, 3, 4};
   int max_signal = 0;

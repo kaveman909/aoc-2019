@@ -26,18 +26,18 @@ vector<int> Intcode::get_modes(int in, int num_params) {
   return modes;
 }
 
-vector<int> Intcode::get_params(vector<int> modes) {
-  vector<int> params;
+vector<int *> Intcode::get_params(vector<int> modes) {
+  vector<int *> params;
   int i = 1;
-  int param;
+  int *param;
   for (int mode : modes) {
     // position mode
     if (mode == 0) {
-      param = program[program[pc + i]];
+      param = &program[program[pc + i]];
     }
     // immediate mode
     else {
-      param = program[pc + i];
+      param = &program[pc + i];
     }
     params.push_back(param);
     i++;
@@ -73,48 +73,48 @@ void Intcode::run_program_common() {
     int op = get_op(inst);
     int args = op_args[op];
     vector<int> modes = get_modes(inst, args);
-    vector<int> params = get_params(modes);
+    vector<int *> params = get_params(modes);
 
     switch (op) {
       case 0:
         return;
       case 1:
-        program[program[pc + 3]] = params[0] + params[1];
+        *params[2] = *params[0] + *params[1];
         break;
       case 2:
-        program[program[pc + 3]] = params[0] * params[1];
+        *params[2] = *params[0] * *params[1];
         break;
       case 3:
-        program[program[pc + 1]] = input.front();
+        *params[0] = input.front();
         input.pop();
         break;
       case 4:
-        output = params[0];
+        output = *params[0];
         break;
       case 5:
-        if (params[0]) {
-          pc = params[1];
+        if (*params[0]) {
+          pc = *params[1];
           update_pc = false;
         }
         break;
       case 6:
-        if (!params[0]) {
-          pc = params[1];
+        if (!*params[0]) {
+          pc = *params[1];
           update_pc = false;
         }
         break;
       case 7:
-        if (params[0] < params[1]) {
-          program[program[pc + 3]] = 1;
+        if (*params[0] < *params[1]) {
+          *params[2] = 1;
         } else {
-          program[program[pc + 3]] = 0;
+          *params[2] = 0;
         }
         break;
       case 8:
-        if (params[0] == params[1]) {
-          program[program[pc + 3]] = 1;
+        if (*params[0] == *params[1]) {
+          *params[2] = 1;
         } else {
-          program[program[pc + 3]] = 0;
+          *params[2] = 0;
         }
         break;
       default:
