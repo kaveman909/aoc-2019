@@ -6,7 +6,7 @@
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   assert(argc == 2);
   Intcode ic(argv[1]);
   array<int, 5> settings = {0, 1, 2, 3, 4};
@@ -22,5 +22,6 @@ int main(int argc, char* argv[]) {
     }
   } while (next_permutation(settings.begin(), settings.end()));
   cout << "Part 1: " << max_signal << endl;
+
   return 0;
 }

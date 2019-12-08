@@ -1,6 +1,7 @@
 #include "intcode.h"
 #include <cassert>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <queue>
 #include <string>
@@ -26,20 +27,20 @@ vector<int> Intcode::get_modes(int in, int num_params) {
   return modes;
 }
 
-vector<int *> Intcode::get_params(vector<int> modes) {
-  vector<int *> params;
+vector<reference_wrapper<int>> Intcode::get_params(vector<int> modes) {
+  vector<reference_wrapper<int>> params;
   int i = 1;
-  int *param;
   for (int mode : modes) {
     // position mode
     if (mode == 0) {
-      param = &program[program[pc + i]];
+      int &param = program[program[pc + i]];
+      params.push_back(param);
     }
     // immediate mode
     else {
-      param = &program[pc + i];
+      int &param = program[pc + i];
+      params.push_back(param);
     }
-    params.push_back(param);
     i++;
   }
   return params;
@@ -73,48 +74,48 @@ void Intcode::run_program_common() {
     int op = get_op(inst);
     int args = op_args[op];
     vector<int> modes = get_modes(inst, args);
-    vector<int *> params = get_params(modes);
+    vector<reference_wrapper<int>> params = get_params(modes);
 
     switch (op) {
       case 0:
         return;
       case 1:
-        *params[2] = *params[0] + *params[1];
+        params[2].get() = params[0] + params[1];
         break;
       case 2:
-        *params[2] = *params[0] * *params[1];
+        params[2].get() = params[0] * params[1];
         break;
       case 3:
-        *params[0] = input.front();
+        params[0].get() = input.front();
         input.pop();
         break;
       case 4:
-        output = *params[0];
+        output = params[0];
         break;
       case 5:
-        if (*params[0]) {
-          pc = *params[1];
+        if (params[0]) {
+          pc = params[1];
           update_pc = false;
         }
         break;
       case 6:
-        if (!*params[0]) {
-          pc = *params[1];
+        if (!params[0]) {
+          pc = params[1];
           update_pc = false;
         }
         break;
       case 7:
-        if (*params[0] < *params[1]) {
-          *params[2] = 1;
+        if (params[0] < params[1]) {
+          params[2].get() = 1;
         } else {
-          *params[2] = 0;
+          params[2].get() = 0;
         }
         break;
       case 8:
-        if (*params[0] == *params[1]) {
-          *params[2] = 1;
+        if (params[0] == params[1]) {
+          params[2].get() = 1;
         } else {
-          *params[2] = 0;
+          params[2].get() = 0;
         }
         break;
       default:

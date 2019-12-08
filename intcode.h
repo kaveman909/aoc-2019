@@ -1,3 +1,4 @@
+#include <functional>
 #include <queue>
 #include <string>
 #include <vector>
@@ -14,7 +15,7 @@ class Intcode {
 
   int get_op(int in);
   vector<int> get_modes(int in, int num_params);
-  vector<int*> get_params(vector<int> modes);
+  vector<reference_wrapper<int>> get_params(vector<int> modes);
   void run_program_common();
 
  public:
