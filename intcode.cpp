@@ -33,13 +33,11 @@ vector<reference_wrapper<int>> Intcode::get_params(vector<int> modes) {
   for (int mode : modes) {
     // position mode
     if (mode == 0) {
-      int &param = program[program[pc + i]];
-      params.push_back(param);
+      params.push_back(program[program[pc + i]]);
     }
     // immediate mode
     else {
-      int &param = program[pc + i];
-      params.push_back(param);
+      params.push_back(program[pc + i]);
     }
     i++;
   }
