@@ -1,4 +1,6 @@
+#include <condition_variable>
 #include <functional>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <vector>
@@ -12,22 +14,30 @@ class Intcode {
   int pc;  // program counter
   queue<int> input;
   int output;
+  Intcode *output_device;
+  mutex mut;
+  condition_variable cv;
+  string program_name;
 
   int get_op(int in);
   vector<int> get_modes(int in, int num_params);
   vector<reference_wrapper<int>> get_params(vector<int> modes);
-  void run_program_common();
 
  public:
   Intcode(string fn);
+  Intcode() = delete;
 
   void modify_program(int index, int value);
   int get_mem(int index);
   int get_output();
+  mutex &get_mutex();
+  condition_variable &get_cv();
+
+  void set_output_device(Intcode *od);
+  void push_input(initializer_list<int> in);
+  void set_program_name(string pn);
 
   void run_program();
-  void run_program(int i1);
-  void run_program(int i1, int i2);
 
   void print_instructions();
 };

@@ -1,8 +1,11 @@
 #include "intcode.h"
 #include <cassert>
+#include <condition_variable>
 #include <fstream>
 #include <functional>
+#include <initializer_list>
 #include <iostream>
+#include <mutex>
 #include <queue>
 #include <string>
 #include <vector>
@@ -45,11 +48,14 @@ vector<reference_wrapper<int>> Intcode::get_params(vector<int> modes) {
 }
 
 Intcode::Intcode(string fn) {
+  program_name = "Program 0";
+  output = 0;
   ifstream in(fn);
   char line[10];
   while (in.getline(line, 10, ',')) {
     instructions.push_back(stoi(line));
   }
+  output_device = nullptr;
 }
 
 void Intcode::modify_program(int index, int value) {
@@ -60,7 +66,7 @@ int Intcode::get_mem(int index) { return program[index]; }
 
 int Intcode::get_output() { return output; }
 
-void Intcode::run_program_common() {
+void Intcode::run_program() {
   pc = 0;
   const int op_args[] = {0, 3, 3, 1, 1, 2, 2, 3, 3};
   // copy program as we'll be modifying memory
@@ -71,8 +77,8 @@ void Intcode::run_program_common() {
     int inst = program[pc];
     int op = get_op(inst);
     int args = op_args[op];
-    vector<int> modes = get_modes(inst, args);
-    vector<reference_wrapper<int>> params = get_params(modes);
+    auto modes = get_modes(inst, args);
+    auto params = get_params(modes);
 
     switch (op) {
       case 0:
@@ -83,12 +89,22 @@ void Intcode::run_program_common() {
       case 2:
         params[2].get() = params[0] * params[1];
         break;
-      case 3:
+      case 3: {
+        unique_lock<mutex> lk(mut);
+        cv.wait(lk, [this] { return !input.empty(); });
         params[0].get() = input.front();
         input.pop();
-        break;
+        lk.unlock();
+      } break;
       case 4:
         output = params[0];
+        if (output_device != nullptr) {
+          {
+            lock_guard<mutex> lk(output_device->get_mutex());
+            output_device->push_input({output});
+          }
+          output_device->get_cv().notify_one();
+        }
         break;
       case 5:
         if (params[0]) {
@@ -129,21 +145,22 @@ void Intcode::run_program_common() {
   }
 }
 
-void Intcode::run_program() { run_program_common(); }
-
-void Intcode::run_program(int i1) {
-  input.push(i1);
-  run_program_common();
-}
-
-void Intcode::run_program(int i1, int i2) {
-  input.push(i1);
-  input.push(i2);
-  run_program_common();
-}
-
 void Intcode::print_instructions() {
   for (int x : instructions) {
     cout << x << endl;
   }
 }
+
+void Intcode::set_output_device(Intcode *od) { output_device = od; }
+
+void Intcode::push_input(initializer_list<int> ins) {
+  for (auto in : ins) {
+    input.push(in);
+  }
+}
+
+mutex &Intcode::get_mutex() { return mut; }
+
+condition_variable &Intcode::get_cv() { return cv; }
+
+void Intcode::set_program_name(string pn) { program_name = pn; }
