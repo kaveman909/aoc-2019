@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
 
   for (int i = 0; i < IMAGE_SIZE; i++) {
     if (colors[i]) {
-      cout << 'X';
+      cout << '#';
     } else {
       cout << ' ';
     }
