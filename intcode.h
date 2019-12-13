@@ -13,19 +13,22 @@ class Intcode {
   vector<long> program;
   int pc;  // program counter
   int rb;  // relative base
-  queue<long> input;
   long output;
   Intcode *output_device;
   mutex mut;
   condition_variable cv;
   string program_name;
   bool debug;
+  void (*output_cb)(Intcode *ic);
 
   int get_op(int in);
   vector<int> get_modes(long in, int num_params);
   vector<reference_wrapper<long>> get_params(vector<int> modes);
 
  public:
+  queue<long> input;
+  queue<long> outputq;
+
   Intcode(string fn);
   Intcode() = delete;
 
@@ -39,6 +42,7 @@ class Intcode {
   void push_input(initializer_list<long> in);
   void set_program_name(string pn);
   void set_debug(bool dbg);
+  void set_cb(void (*cb)(Intcode *ic));
 
   void run_program();
 

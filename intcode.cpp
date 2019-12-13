@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 
+//#define PRINT
+#include "util.h"
+
 using namespace std;
 
 int Intcode::get_op(int in) {
@@ -62,6 +65,7 @@ Intcode::Intcode(string fn) {
     instructions.push_back(stol(line));
   }
   output_device = nullptr;
+  output_cb = nullptr;
 }
 
 void Intcode::modify_program(int index, int value) {
@@ -123,15 +127,16 @@ void Intcode::run_program() {
       } break;
       case 4:
         output = params[0];
-        if (debug) {
-          cout << "output: " << output << endl << endl;
-        }
+        outputq.push(output);
         if (output_device != nullptr) {
           {
             lock_guard<mutex> lk(output_device->get_mutex());
             output_device->push_input({output});
           }
           output_device->get_cv().notify_one();
+        }
+        if (output_cb != nullptr) {
+          output_cb(this);
         }
         break;
       case 5:
@@ -198,3 +203,5 @@ condition_variable &Intcode::get_cv() { return cv; }
 void Intcode::set_program_name(string pn) { program_name = pn; }
 
 void Intcode::set_debug(bool dbg) { debug = dbg; }
+
+void Intcode::set_cb(void (*cb)(Intcode *ic)) { output_cb = cb; }
