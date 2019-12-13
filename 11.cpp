@@ -82,5 +82,34 @@ int main(int argc, char *argv[]) {
     // cout << "accum: " << total << endl;
   }
   cout << "Part 1: " << total << endl;
+
+  // part 2: start on a white tile
+  // reset the globals (bad design!)
+  vector<vector<int>> blank_grid(GRID_SIZE, vector<int>(GRID_SIZE, 0));
+  grid = blank_grid;
+  painted = blank_grid;
+  x = GRID_SIZE / 2;
+  y = GRID_SIZE / 2;
+  facing = {0, -1};
+
+  Intcode prog2(argv[1]);
+  grid[y][x] = 1;  // start on white
+
+  prog2.push_input({grid[y][x]});
+  prog2.set_cb(output_cb);
+  prog2.run_program();
+
+  cout << "Part 2: " << endl;
+  for (auto &column : grid) {
+    for (auto &tile : column) {
+      if (tile) {
+        cout << "#";
+      } else {
+        cout << " ";
+      }
+    }
+    cout << endl;
+  }
+
   return 0;
 }
